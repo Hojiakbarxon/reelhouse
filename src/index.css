@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Color system — "midnight reel": ink navy + marquee gold + crimson ticket accent */
+  --color-ink-950: #0a0d13;
+  --color-ink-900: #0b0e14;
+  --color-ink-800: #141924;
+  --color-ink-700: #1b2230;
+  --color-ink-600: #262e3f;
+  --color-ink-500: #3a4457;
+  --color-ink-400: #5a6578;
+
+  --color-paper-100: #f6f4ee;
+  --color-paper-300: #d8d4c8;
+  --color-paper-500: #8b93a7;
+
+  --color-gold-300: #f3d489;
+  --color-gold-400: #e8b94d;
+  --color-gold-500: #c79a3a;
+  --color-gold-600: #96721f;
+
+  --color-crimson-400: #e2666f;
+  --color-crimson-500: #d64550;
+  --color-crimson-600: #a52e37;
+
+  --color-emerald-400: #4ade80;
+
+  --font-display: 'Anton', 'Arial Narrow', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius-card: 0.5rem;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-ink-900);
+  color: var(--color-paper-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-gold-400);
+  color: var(--color-ink-950);
+}
+
+/* visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+button:not(:disabled),
+[role='button']:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* slim, themed scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink-900);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-600);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-500);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Signature element: sprocket-hole film strip divider, used sparingly
+   at section boundaries to nod at the medium without decorating every panel. */
+.filmstrip {
+  height: 10px;
+  background-image: radial-gradient(circle, var(--color-ink-600) 2.5px, transparent 2.6px);
+  background-size: 22px 10px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.6;
+}
+
+.text-balance {
+  text-wrap: balance;
+}

@@ -5,6 +5,7 @@ import { useMovieDetail } from '@/hooks/use-movie-detail';
 import { useCreateReview, useDeleteReview } from '@/hooks/use-reviews';
 import { useFavourites, useToggleFavourite } from '@/hooks/use-favourites';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { useAuthStore } from '@/store/auth-store';
 import { Poster } from '@/components/ui/Poster';
 import { Badge } from '@/components/ui/Feedback';
 import { StarRating } from '@/components/ui/StarRating';
@@ -12,19 +13,20 @@ import { Spinner, ErrorState } from '@/components/ui/Feedback';
 import { Button } from '@/components/ui/Button';
 import { MoviePlayer } from '@/components/movies/MoviePlayer';
 import { ReviewForm } from '@/components/movies/ReviewForm';
+import { ReviewsList } from '@/components/movies/ReviewsList';
 import { SubscriptionType, type Review } from '@/api/types';
 
 export function MovieDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: movie, isLoading, isError, refetch } = useMovieDetail(slug);
   const { data: me } = useCurrentUser();
+  const role = useAuthStore((s) => s.role);
   const { data: favourites } = useFavourites();
   const { add, remove } = useToggleFavourite();
 
-  // The backend has no "list reviews" endpoint — only create/delete — so the
-  // aggregate rating comes from the API, but the review someone just posted
-  // is only visible to them, for this browser session, until that changes.
-  const [myReview, setMyReview] = useState<Review | null>(null);
+  // Fallback for before the backend embeds reviews.items on GET /movies/:slug —
+  // once it does, the real list below takes over and this is never used.
+  const [localMyReview, setLocalMyReview] = useState<Review | null>(null);
 
   const createReview = useCreateReview(movie?.id ?? '', slug ?? '');
   const deleteReview = useDeleteReview(movie?.id ?? '', slug ?? '');
@@ -44,6 +46,8 @@ export function MovieDetailPage() {
 
   const isFavourited = favourites?.movies.some((m) => m.id === movie.id) ?? false;
   const movieFiles = Array.isArray(movie.files) ? movie.files : null;
+  const reviewItems = movie.reviews.items;
+  const alreadyReviewed = reviewItems?.some((r) => r.user.id === me?.id) ?? !!localMyReview;
 
   function handleToggleFavourite() {
     if (isFavourited) remove.mutate(movie!.id);
@@ -52,13 +56,16 @@ export function MovieDetailPage() {
 
   function handlePostReview(values: { rating: number; comment: string }) {
     createReview.mutate(values, {
-      onSuccess: (response) => setMyReview(response.data.data),
+      onSuccess: (response) => setLocalMyReview(response.data.data),
     });
   }
 
-  function handleDeleteReview() {
-    if (!myReview) return;
-    deleteReview.mutate(myReview.id, { onSuccess: () => setMyReview(null) });
+  function handleDeleteReview(reviewId: string) {
+    deleteReview.mutate(reviewId, {
+      onSuccess: () => {
+        if (reviewId === localMyReview?.id) setLocalMyReview(null);
+      },
+    });
   }
 
   return (
@@ -137,30 +144,46 @@ export function MovieDetailPage() {
         </p>
 
         <div className="mt-4 max-w-xl">
-          {myReview ? (
-            <div className="flex items-start justify-between gap-4 rounded-card border border-ink-700 bg-ink-800 p-4">
+          {reviewItems && reviewItems.length > 0 && (
+            <div className="mb-4">
+              <ReviewsList
+                reviews={reviewItems}
+                currentUserId={me?.id}
+                currentUserRole={role}
+                onDelete={handleDeleteReview}
+                isDeleting={deleteReview.isPending}
+              />
+            </div>
+          )}
+
+          {/* Fallback panel for a review just posted this session, only used
+              when the backend hasn't started returning reviews.items yet. */}
+          {!reviewItems && localMyReview && (
+            <div className="mb-4 flex items-start justify-between gap-4 rounded-card border border-ink-700 bg-ink-800 p-4">
               <div>
-                <p className="text-sm font-medium text-paper-100">{myReview.user.username} (you)</p>
-                <StarRating value={myReview.rating} />
-                <p className="mt-2 text-sm text-paper-300">{myReview.comment}</p>
+                <p className="text-sm font-medium text-paper-100">{localMyReview.user.username} (you)</p>
+                <StarRating value={localMyReview.rating} />
+                <p className="mt-2 text-sm text-paper-300">{localMyReview.comment}</p>
               </div>
               <button
-                onClick={handleDeleteReview}
+                onClick={() => handleDeleteReview(localMyReview.id)}
                 className="p-1 text-paper-500 hover:text-crimson-400"
                 aria-label="Delete your review"
               >
                 <Trash2 className="size-4" />
               </button>
             </div>
-          ) : me ? (
-            <ReviewForm onSubmit={handlePostReview} isSubmitting={createReview.isPending} />
-          ) : (
+          )}
+
+          {!me ? (
             <p className="text-sm text-paper-500">
               <Link to="/login" className="font-medium text-gold-400 hover:text-gold-300">
                 Sign in
               </Link>{' '}
               to leave a review.
             </p>
+          ) : alreadyReviewed ? null : (
+            <ReviewForm onSubmit={handlePostReview} isSubmitting={createReview.isPending} />
           )}
         </div>
       </div>

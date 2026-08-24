@@ -3,7 +3,7 @@ import { Heart, Play } from 'lucide-react';
 import { useFavourites, useToggleFavourite } from '@/hooks/use-favourites';
 import { Poster } from '@/components/ui/Poster';
 import { Badge } from '@/components/ui/Feedback';
-import { RatingOutOfTen } from '@/components/ui/StarRating';
+import { MovieRatingStars } from '@/components/ui/StarRating';
 import { Spinner, EmptyState, ErrorState } from '@/components/ui/Feedback';
 import { SubscriptionType } from '@/api/types';
 
@@ -63,7 +63,7 @@ export function FavouritesPage() {
                   <div className="flex flex-col gap-1.5 p-3">
                     <h3 className="line-clamp-1 font-semibold text-paper-100">{movie.title}</h3>
                     <p className="font-mono text-xs text-paper-500">{movie.release_year}</p>
-                    <RatingOutOfTen value={movie.rating} />
+                    <MovieRatingStars value={movie.rating} />
                   </div>
                 </Link>
                 <button

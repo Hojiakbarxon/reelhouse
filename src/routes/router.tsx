@@ -37,6 +37,12 @@ const AdminUsersPage = lazy(() =>
 const AdminPlansPage = lazy(() =>
   import('@/pages/admin/plans/AdminPlansPage').then((m) => ({ default: m.AdminPlansPage })),
 );
+const AdminSubscriptionsPage = lazy(() =>
+  import('@/pages/admin/subscriptions/AdminSubscriptionsPage').then((m) => ({ default: m.AdminSubscriptionsPage })),
+);
+const AdminPaymentsPage = lazy(() =>
+  import('@/pages/admin/payments/AdminPaymentsPage').then((m) => ({ default: m.AdminPaymentsPage })),
+);
 
 export const router = createBrowserRouter([
   {
@@ -123,6 +129,22 @@ export const router = createBrowserRouter([
                 element: (
                   <AdminSuspense>
                     <AdminPlansPage />
+                  </AdminSuspense>
+                ),
+              },
+              {
+                path: 'subscriptions',
+                element: (
+                  <AdminSuspense>
+                    <AdminSubscriptionsPage />
+                  </AdminSuspense>
+                ),
+              },
+              {
+                path: 'payments',
+                element: (
+                  <AdminSuspense>
+                    <AdminPaymentsPage />
                   </AdminSuspense>
                 ),
               },

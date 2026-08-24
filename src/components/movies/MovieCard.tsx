@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import { Poster } from '@/components/ui/Poster';
 import { Badge } from '@/components/ui/Feedback';
-import { RatingOutOfTen } from '@/components/ui/StarRating';
+import { MovieRatingStars } from '@/components/ui/StarRating';
 import { SubscriptionType, type MovieListItem } from '@/api/types';
 
 export function MovieCard({ movie }: { movie: MovieListItem }) {
@@ -43,7 +43,7 @@ export function MovieCard({ movie }: { movie: MovieListItem }) {
         <p className="font-mono text-xs text-paper-500">
           {movie.release_year} · {movie.duration_minutes}m
         </p>
-        <RatingOutOfTen value={movie.rating} />
+        <MovieRatingStars value={movie.rating} />
       </div>
     </Link>
   );

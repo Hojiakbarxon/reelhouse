@@ -116,6 +116,11 @@ export interface MovieDetail {
   reviews: {
     average_rating: number;
     count: number;
+    // Suggested addition to GET /movies/:slug — the full list, so the
+    // detail page can show everyone's reviews, not just the viewer's own.
+    // Optional here so the frontend degrades gracefully until the backend
+    // ships it.
+    items?: Review[];
   };
 }
 
@@ -134,7 +139,7 @@ export interface AdminMovieListItem {
 export interface Review {
   id: string;
   user: { id: string; username: string };
-  movie_id: string;
+  movie_id?: string;
   rating: number;
   comment: string;
   created_at: string;

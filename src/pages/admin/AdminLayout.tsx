@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { Clapperboard, Tags, Users, CreditCard, ArrowLeft } from 'lucide-react';
+import { Clapperboard, Tags, Users, CreditCard, Wallet, Receipt, ArrowLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -33,6 +33,14 @@ export function AdminLayout() {
           <NavLink to="/admin/plans" className={linkClass}>
             <CreditCard className="size-4" aria-hidden />
             Plans
+          </NavLink>
+          <NavLink to="/admin/subscriptions" className={linkClass}>
+            <Wallet className="size-4" aria-hidden />
+            Subscriptions
+          </NavLink>
+          <NavLink to="/admin/payments" className={linkClass}>
+            <Receipt className="size-4" aria-hidden />
+            Payments
           </NavLink>
         </nav>
       </aside>

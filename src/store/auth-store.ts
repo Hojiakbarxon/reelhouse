@@ -40,3 +40,5 @@ export const useAuthStore = create<AuthState>()(
     { name: 'movies-auth' },
   ),
 );
+
+

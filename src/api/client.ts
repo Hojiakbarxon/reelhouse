@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/auth-store';
 
 // The backend mounts everything under a global "/api" prefix
@@ -50,12 +51,23 @@ export function extractErrorMessage(error: unknown): string {
 // On 401, the access token is invalid/expired. This backend does not expose
 // a refresh endpoint, so the correct move is to sign the user out locally
 // and send them to log in again — silently retrying would just loop.
+//
+// On 429, the shared ThrottlerGuard has kicked in — surface a friendly toast
+// everywhere except the auth pages, which already render their own inline
+// AuthAlert for the same response.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      useAuthStore.getState().logout();
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        useAuthStore.getState().logout();
+      }
+      if (error.response?.status === 429 && !error.config?.url?.includes('/auth/')) {
+        toast.error("You're doing that a bit too fast — give it a few seconds and try again.");
+      }
     }
     return Promise.reject(error);
   },
 );
+
+

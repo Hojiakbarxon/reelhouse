@@ -5,10 +5,11 @@ import { ChevronDown } from 'lucide-react';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
+  error?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, id, children, ...props }, ref) => {
+  ({ className, label, error, id, children, ...props }, ref) => {
     const selectId = id ?? props.name;
     return (
       <div className="flex flex-col gap-1.5">
@@ -21,9 +22,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
+            aria-invalid={!!error}
             className={clsx(
-              'w-full appearance-none rounded-md border border-ink-600 bg-ink-800 px-3 py-2.5 pr-9 text-paper-100',
+              'w-full appearance-none rounded-md border bg-ink-800 px-3 py-2.5 pr-9 text-paper-100',
               'transition-colors focus:border-gold-400',
+              error ? 'border-crimson-500' : 'border-ink-600',
               className,
             )}
             {...props}
@@ -35,8 +38,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             aria-hidden
           />
         </div>
+        {error && <p className="text-sm text-crimson-400">{error}</p>}
       </div>
     );
   },
 );
 Select.displayName = 'Select';
+
+

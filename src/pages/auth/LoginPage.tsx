@@ -1,15 +1,18 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import { AuthLayout, AuthFooterLink } from './AuthLayout';
 import { loginSchema, type LoginFormValues } from './schemas';
 import { authApi } from '@/api/auth';
-import { extractErrorMessage } from '@/api/client';
+import { classifyError } from '@/lib/errors';
+import type { ClassifiedError } from '@/lib/errors';
 import { useAuthStore } from '@/store/auth-store';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Button } from '@/components/ui/Button';
+import { AuthAlert } from '@/components/ui/AuthAlert';
 import { Link } from 'react-router-dom';
 
 export function LoginPage() {
@@ -17,6 +20,7 @@ export function LoginPage() {
   const location = useLocation();
   const setToken = useAuthStore((s) => s.setToken);
   const state = location.state as { email?: string; from?: Location } | null;
+  const [formError, setFormError] = useState<ClassifiedError | null>(null);
 
   const {
     register,
@@ -28,6 +32,7 @@ export function LoginPage() {
   });
 
   async function onSubmit(values: LoginFormValues) {
+    setFormError(null);
     try {
       const response = await authApi.login(values);
       setToken(response.data.data.authToken);
@@ -35,11 +40,7 @@ export function LoginPage() {
       const redirectTo = state?.from?.pathname ?? '/';
       navigate(redirectTo, { replace: true });
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        toast.error('Incorrect email or password.');
-        return;
-      }
-      toast.error(extractErrorMessage(error));
+      setFormError(classifyError(error));
     }
   }
 
@@ -50,6 +51,7 @@ export function LoginPage() {
       footer={<AuthFooterLink prompt="New to Reelhouse?" linkText="Create an account" to="/register" />}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+        {formError && <AuthAlert error={formError} />}
         <Input
           label="Email"
           type="email"
@@ -57,9 +59,8 @@ export function LoginPage() {
           error={errors.email?.message}
           {...register('email')}
         />
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
           autoComplete="current-password"
           error={errors.password?.message}
           {...register('password')}

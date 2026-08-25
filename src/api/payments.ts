@@ -8,3 +8,5 @@ export const paymentsApi = {
   refund: (paymentId: string) => api.patch<ApiEnvelope<Payment>>(`/payments/${paymentId}/refund`),
   listAll: () => api.get<ApiEnvelope<Payment[]>>('/payments'),
 };
+
+

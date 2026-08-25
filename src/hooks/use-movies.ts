@@ -8,3 +8,5 @@ export function useMovies(query: MoviesQuery) {
     placeholderData: (prev) => prev,
   });
 }
+
+

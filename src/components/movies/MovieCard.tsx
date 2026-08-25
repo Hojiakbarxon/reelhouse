@@ -48,3 +48,5 @@ export function MovieCard({ movie }: { movie: MovieListItem }) {
     </Link>
   );
 }
+
+

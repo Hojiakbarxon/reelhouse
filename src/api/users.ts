@@ -3,7 +3,6 @@ import type { User } from './types';
 
 export interface UpdateProfilePayload {
   full_name?: string;
-  phone?: string;
   country?: string;
 }
 
@@ -26,7 +25,7 @@ function toUserFormData(payload: CreateUserPayload | Partial<CreateUserPayload>)
 
 export const usersApi = {
   me: (userId: string) => api.get<ApiEnvelope<User>>(`/users/${userId}`),
-  updateAccount: (userId: string, payload: { username?: string; email?: string; avatar?: File }) =>
+  updateAccount: (userId: string, payload: { username?: string; avatar?: File }) =>
     api.patch(`/users/${userId}`, toUserFormData(payload), {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
@@ -41,3 +40,5 @@ export const usersApi = {
     api.post('/users/admin', toUserFormData(payload), { headers: { 'Content-Type': 'multipart/form-data' } }),
   remove: (userId: string) => api.delete(`/users/${userId}`),
 };
+
+

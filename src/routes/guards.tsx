@@ -39,3 +39,5 @@ export function RequireSuperAdmin() {
   if (role !== UserRole.SUPERADMIN) return <Navigate to="/" replace />;
   return <Outlet />;
 }
+
+

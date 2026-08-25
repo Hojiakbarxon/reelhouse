@@ -12,3 +12,5 @@ export function ComingSoon({ title, phase }: { title: string; phase: string }) {
     </div>
   );
 }
+
+

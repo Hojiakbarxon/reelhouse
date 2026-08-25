@@ -14,3 +14,5 @@ export function formatDate(value: string | Date | null | undefined): string {
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
+
+

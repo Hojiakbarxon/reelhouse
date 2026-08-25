@@ -1,13 +1,16 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Lock } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { useUpdateAccount, useUpdateProfile } from '@/hooks/use-account';
 import { accountSchema, profileSchema, type AccountFormValues, type ProfileFormValues } from './schemas';
 import { AvatarPicker } from '@/components/ui/AvatarPicker';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Spinner, ErrorState } from '@/components/ui/Feedback';
 import { MySubscriptions } from '@/components/user/MySubscriptions';
+import { Country } from '@/api/types';
 
 export function AccountPage() {
   const { data: me, isLoading, isError, refetch } = useCurrentUser();
@@ -16,7 +19,7 @@ export function AccountPage() {
 
   const accountForm = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
-    values: me ? { username: me.username, email: me.email } : undefined,
+    values: me ? { username: me.username } : undefined,
   });
 
   const profileForm = useForm<ProfileFormValues>({
@@ -24,8 +27,7 @@ export function AccountPage() {
     values: me?.profile
       ? {
           full_name: me.profile.full_name ?? '',
-          phone: me.profile.phone ?? '',
-          country: me.profile.country ?? '',
+          country: (me.profile.country as Country) ?? '',
         }
       : undefined,
   });
@@ -44,11 +46,8 @@ export function AccountPage() {
   }
 
   function handleAccountSubmit(values: AccountFormValues) {
-    const changed: { username?: string; email?: string } = {};
-    if (values.username !== me!.username) changed.username = values.username;
-    if (values.email !== me!.email) changed.email = values.email;
-    if (Object.keys(changed).length === 0) return;
-    updateAccount.mutate(changed);
+    if (values.username === me!.username) return;
+    updateAccount.mutate({ username: values.username });
   }
 
   function handleProfileSubmit(values: ProfileFormValues) {
@@ -79,12 +78,14 @@ export function AccountPage() {
             error={accountForm.formState.errors.username?.message}
             {...accountForm.register('username')}
           />
-          <Input
-            label="Email"
-            type="email"
-            error={accountForm.formState.errors.email?.message}
-            {...accountForm.register('email')}
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-paper-300">Email</label>
+            <div className="flex items-center justify-between gap-2 rounded-md border border-ink-600 bg-ink-800/60 px-3 py-2.5 text-paper-500">
+              <span className="truncate">{me.email}</span>
+              <Lock className="size-4 shrink-0" aria-hidden />
+            </div>
+            <p className="text-xs text-paper-500">Your email is fixed to this account and can't be changed.</p>
+          </div>
           <Button type="submit" isLoading={updateAccount.isPending} className="self-start">
             Save changes
           </Button>
@@ -99,8 +100,18 @@ export function AccountPage() {
           className="mt-4 flex max-w-sm flex-col gap-4"
         >
           <Input label="Full name" error={profileForm.formState.errors.full_name?.message} {...profileForm.register('full_name')} />
-          <Input label="Phone" error={profileForm.formState.errors.phone?.message} {...profileForm.register('phone')} />
-          <Input label="Country" error={profileForm.formState.errors.country?.message} {...profileForm.register('country')} />
+          <Select
+            label="Country"
+            error={profileForm.formState.errors.country?.message}
+            {...profileForm.register('country')}
+          >
+            <option value="">Select a country</option>
+            {Object.values(Country).map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </Select>
           <Button type="submit" isLoading={updateProfile.isPending} className="self-start">
             Save profile
           </Button>
@@ -116,3 +127,5 @@ export function AccountPage() {
     </div>
   );
 }
+
+

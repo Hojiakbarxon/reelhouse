@@ -85,3 +85,5 @@ export const moviesApi = {
 
   removeFile: (fileId: string) => api.delete(`/admin/movies/files/${fileId}`),
 };
+
+

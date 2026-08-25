@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Feedback';
 import { Spinner, EmptyState, ErrorState } from '@/components/ui/Feedback';
@@ -142,12 +143,7 @@ export function AdminUsersPage() {
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
           <Input label="Username" error={errors.username?.message} {...register('username')} />
           <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />
-          <Input
-            label="Password"
-            type="password"
-            error={errors.password?.message}
-            {...register('password')}
-          />
+          <PasswordInput label="Password" error={errors.password?.message} {...register('password')} />
           {isSuperAdmin && (
             <label className="flex items-center gap-2 text-sm text-paper-300">
               <input type="checkbox" checked={asAdmin} onChange={(e) => setAsAdmin(e.target.checked)} />
@@ -176,3 +172,5 @@ export function AdminUsersPage() {
     </div>
   );
 }
+
+

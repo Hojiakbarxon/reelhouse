@@ -9,7 +9,7 @@ export function useUpdateAccount() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { username?: string; email?: string; avatar?: File }) =>
+    mutationFn: (payload: { username?: string; avatar?: File }) =>
       usersApi.updateAccount(userId as string, payload),
     onSuccess: () => {
       toast.success('Account updated');
@@ -34,3 +34,5 @@ export function useUpdateProfile() {
     onError: (error) => toast.error(extractErrorMessage(error)),
   });
 }
+
+

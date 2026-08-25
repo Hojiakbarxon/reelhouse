@@ -30,3 +30,5 @@ export const userSubscriptionsApi = {
   remove: (id: string) => api.delete(`/user-subscriptions/${id}`),
   listAll: () => api.get<ApiEnvelope<UserSubscription[]>>('/user-subscriptions'),
 };
+
+

@@ -10,3 +10,5 @@ export const categoriesApi = {
     api.patch<ApiEnvelope<Category>>(`/categories/${id}`, payload),
   remove: (id: string) => api.delete(`/categories/${id}`),
 };
+
+

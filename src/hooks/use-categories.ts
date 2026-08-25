@@ -14,3 +14,5 @@ export function useCategories() {
     staleTime: 5 * 60_000,
   });
 }
+
+

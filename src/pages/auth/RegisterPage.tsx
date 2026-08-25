@@ -1,17 +1,20 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import axios from 'axios';
+import { useState } from 'react';
 import { AuthLayout, AuthFooterLink } from './AuthLayout';
 import { registerSchema, type RegisterFormValues } from './schemas';
 import { authApi } from '@/api/auth';
-import { extractErrorMessage } from '@/api/client';
+import { classifyError } from '@/lib/errors';
 import { Input } from '@/components/ui/Input';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 import { Button } from '@/components/ui/Button';
+import { AuthAlert } from '@/components/ui/AuthAlert';
+import type { ClassifiedError } from '@/lib/errors';
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const [formError, setFormError] = useState<ClassifiedError | null>(null);
   const {
     register,
     handleSubmit,
@@ -19,17 +22,16 @@ export function RegisterPage() {
   } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) });
 
   async function onSubmit(values: RegisterFormValues) {
+    setFormError(null);
     try {
       await authApi.register(values);
-      toast.success('Account created — check your email for a verification code.');
-      navigate('/confirm-otp', { state: { email: values.email } });
+      // The OTP page needs username/password too, so its "resend code"
+      // action can call the same /auth/register endpoint again — the
+      // backend just refreshes the OTP on the existing pending user
+      // rather than exposing a dedicated resend endpoint.
+      navigate('/confirm-otp', { state: { ...values } });
     } catch (error) {
-      // A 409 here means the email or username is already taken.
-      if (axios.isAxiosError(error) && error.response?.status === 409) {
-        toast.error('That email or username is already registered.');
-        return;
-      }
-      toast.error(extractErrorMessage(error));
+      setFormError(classifyError(error));
     }
   }
 
@@ -40,6 +42,7 @@ export function RegisterPage() {
       footer={<AuthFooterLink prompt="Already have an account?" linkText="Sign in" to="/login" />}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+        {formError && <AuthAlert error={formError} />}
         <Input
           label="Username"
           autoComplete="username"
@@ -53,9 +56,8 @@ export function RegisterPage() {
           error={errors.email?.message}
           {...register('email')}
         />
-        <Input
+        <PasswordInput
           label="Password"
-          type="password"
           autoComplete="new-password"
           error={errors.password?.message}
           {...register('password')}
@@ -67,3 +69,5 @@ export function RegisterPage() {
     </AuthLayout>
   );
 }
+
+

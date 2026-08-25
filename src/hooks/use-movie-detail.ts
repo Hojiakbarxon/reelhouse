@@ -13,3 +13,5 @@ export function useMovieDetail(slug: string | undefined) {
     refetchOnMount: 'always',
   });
 }
+
+

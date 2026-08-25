@@ -45,3 +45,5 @@ export function CategoryCheckboxList({
     </div>
   );
 }
+
+

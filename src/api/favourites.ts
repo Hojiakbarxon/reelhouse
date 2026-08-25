@@ -6,3 +6,5 @@ export const favouritesApi = {
   add: (movie_id: string) => api.post('/favourites', { movie_id }),
   remove: (movieId: string) => api.delete(`/favourites/${movieId}`),
 };
+
+

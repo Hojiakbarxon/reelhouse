@@ -84,3 +84,5 @@ export function MovieRatingStars({ value }: { value: number | string }) {
     </div>
   );
 }
+
+

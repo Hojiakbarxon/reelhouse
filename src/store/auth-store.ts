@@ -1,12 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
-import type { AccessTokenPayload, UserRole } from '@/api/types';
+import type { AccessTokenPayload } from '@/api/types';
 
 interface AuthState {
   accessToken: string | null;
   userId: string | null;
-  role: UserRole | null;
   setToken: (token: string) => void;
   logout: () => void;
   isTokenValid: () => boolean;
@@ -17,14 +16,13 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       accessToken: null,
       userId: null,
-      role: null,
 
       setToken: (token: string) => {
         const payload = jwtDecode<AccessTokenPayload>(token);
-        set({ accessToken: token, userId: payload.id, role: payload.role });
+        set({ accessToken: token, userId: payload.id });
       },
 
-      logout: () => set({ accessToken: null, userId: null, role: null }),
+      logout: () => set({ accessToken: null, userId: null }),
 
       isTokenValid: () => {
         const { accessToken } = get();
@@ -40,5 +38,3 @@ export const useAuthStore = create<AuthState>()(
     { name: 'movies-auth' },
   ),
 );
-
-

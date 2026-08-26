@@ -4,6 +4,9 @@ export const registerSchema = z.object({
   username: z.string().min(3, 'At least 3 characters').max(32, 'Too long'),
   email: z.email('Enter a valid email'),
   password: z.string().min(6, 'At least 6 characters'),
+  agreeToTerms: z.boolean().refine((v) => v === true, {
+    message: 'You must agree before creating an account',
+  }),
 });
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 

@@ -5,7 +5,6 @@ import { useMovieDetail } from '@/hooks/use-movie-detail';
 import { useCreateReview, useDeleteReview } from '@/hooks/use-reviews';
 import { useFavourites, useToggleFavourite } from '@/hooks/use-favourites';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useAuthStore } from '@/store/auth-store';
 import { Poster } from '@/components/ui/Poster';
 import { Badge } from '@/components/ui/Feedback';
 import { StarRating } from '@/components/ui/StarRating';
@@ -20,7 +19,6 @@ export function MovieDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: movie, isLoading, isError, refetch } = useMovieDetail(slug);
   const { data: me } = useCurrentUser();
-  const role = useAuthStore((s) => s.role);
   const { data: favourites } = useFavourites();
   const { add, remove } = useToggleFavourite();
 
@@ -149,7 +147,7 @@ export function MovieDetailPage() {
               <ReviewsList
                 reviews={reviewItems}
                 currentUserId={me?.id}
-                currentUserRole={role}
+                currentUserRole={me?.role ?? null}
                 onDelete={handleDeleteReview}
                 isDeleting={deleteReview.isPending}
               />
@@ -190,5 +188,3 @@ export function MovieDetailPage() {
     </div>
   );
 }
-
-

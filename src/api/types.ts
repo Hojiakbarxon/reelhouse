@@ -260,7 +260,6 @@ export interface User {
 // AuthGuard trusts come from decoding the access token client-side.
 export interface AccessTokenPayload {
   id: string;
-  role: UserRole;
   iat: number;
   exp: number;
 }

@@ -15,12 +15,11 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const isValid = useAuthStore((s) => s.isTokenValid());
-  const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
   const { data: me } = useCurrentUser();
 
-  const isStaff = role === UserRole.ADMIN || role === UserRole.SUPERADMIN;
+  const isStaff = me?.role === UserRole.ADMIN || me?.role === UserRole.SUPERADMIN;
 
   function handleLogout() {
     logout();
@@ -148,5 +147,3 @@ export function Navbar() {
     </header>
   );
 }
-
-

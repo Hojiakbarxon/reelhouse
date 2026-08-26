@@ -9,7 +9,7 @@ import {
   useUpdatePlan,
   useDeletePlan,
 } from '@/hooks/use-admin-plans';
-import { useAuthStore } from '@/store/auth-store';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input, Textarea } from '@/components/ui/Input';
@@ -19,7 +19,8 @@ import { formatPrice } from '@/lib/format';
 import { UserRole, type SubscriptionPlan } from '@/api/types';
 
 export function AdminPlansPage() {
-  const isSuperAdmin = useAuthStore((s) => s.role) === UserRole.SUPERADMIN;
+  const { data: me } = useCurrentUser();
+  const isSuperAdmin = me?.role === UserRole.SUPERADMIN;
   const { data: plans, isLoading, isError, refetch } = useAdminPlans();
   const createPlan = useCreatePlan();
   const updatePlan = useUpdatePlan();
@@ -196,5 +197,3 @@ export function AdminPlansPage() {
     </div>
   );
 }
-
-

@@ -35,4 +35,19 @@ export function useUpdateProfile() {
   });
 }
 
+// Every account holder — regular user, admin, or superadmin — can delete
+// their own account (DELETE /users/:userId). On success the session is
+// cleared locally, since the account backing it no longer exists.
+export function useDeleteMyAccount() {
+  const userId = useAuthStore((s) => s.userId);
+  const logout = useAuthStore((s) => s.logout);
 
+  return useMutation({
+    mutationFn: () => usersApi.remove(userId as string),
+    onSuccess: () => {
+      toast.success('Your account has been deleted');
+      logout();
+    },
+    onError: (error) => toast.error(extractErrorMessage(error)),
+  });
+}

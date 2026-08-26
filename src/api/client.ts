@@ -8,11 +8,15 @@ const API_ROOT = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 export const api = axios.create({
   baseURL: `${API_ROOT}/api`,
+  // Needed so the browser sends/receives the httpOnly refreshToken cookie
+  // set by POST /auth/login and read by POST /auth/refresh. Requires the
+  // backend's CORS to use an explicit origin + credentials: true (never '*'),
+  // and the cookie itself needs sameSite: 'none' since frontend and backend
+  // are on different domains.
+  withCredentials: true,
 });
 
-// Attach the bearer token to every request. The backend's AuthGuard reads
-// `Authorization: Bearer <token>` — it does NOT use the refresh cookie for
-// route protection, so we don't need withCredentials here.
+// Attach the bearer token to every request.
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
@@ -48,26 +52,69 @@ export function extractErrorMessage(error: unknown): string {
   return 'Something went wrong. Please try again.';
 }
 
-// On 401, the access token is invalid/expired. This backend does not expose
-// a refresh endpoint, so the correct move is to sign the user out locally
-// and send them to log in again — silently retrying would just loop.
-//
-// On 429, the shared ThrottlerGuard has kicked in — surface a friendly toast
-// everywhere except the auth pages, which already render their own inline
-// AuthAlert for the same response.
+// Silent access-token refresh, de-duplicated so several concurrent 401s only
+// trigger one network call. Uses a bare axios call (not the `api` instance)
+// to avoid re-entering these same interceptors.
+let refreshPromise: Promise<string | null> | null = null;
+
+function refreshAccessToken(): Promise<string | null> {
+  if (!refreshPromise) {
+    refreshPromise = axios
+      .post<ApiEnvelope<{ authToken: string }>>(`${API_ROOT}/api/auth/refresh`, {}, { withCredentials: true })
+      .then((res) => {
+        const newToken = res.data.data.authToken;
+        useAuthStore.getState().setToken(newToken);
+        return newToken;
+      })
+      .catch(() => {
+        useAuthStore.getState().logout();
+        return null;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        useAuthStore.getState().logout();
+  async (error) => {
+    if (!axios.isAxiosError(error)) return Promise.reject(error);
+
+    const status = error.response?.status;
+    const originalRequest = error.config as (typeof error.config & { _retried?: boolean }) | undefined;
+    const isRefreshCall = originalRequest?.url?.includes('/auth/refresh');
+    const isAuthCall = originalRequest?.url?.includes('/auth/');
+
+    // On a genuine 401, try one silent refresh — but only if we actually had
+    // a session to refresh — and retry the original request once. If the
+    // refresh itself fails, the user is already logged out inside
+    // refreshAccessToken().
+    if (
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retried &&
+      !isRefreshCall &&
+      useAuthStore.getState().accessToken
+    ) {
+      originalRequest._retried = true;
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        originalRequest.headers = originalRequest.headers ?? {};
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
       }
-      if (error.response?.status === 429 && !error.config?.url?.includes('/auth/')) {
-        toast.error("You're doing that a bit too fast — give it a few seconds and try again.");
-      }
+    } else if (status === 401) {
+      useAuthStore.getState().logout();
     }
+
+    // The shared ThrottlerGuard kicked in — surface a friendly toast
+    // everywhere except the auth pages, which render their own inline alert.
+    if (status === 429 && !isAuthCall) {
+      toast.error("You're doing that a bit too fast — give it a few seconds and try again.");
+    }
+
     return Promise.reject(error);
   },
 );
-
-

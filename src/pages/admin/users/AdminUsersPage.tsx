@@ -5,6 +5,7 @@ import { Plus, Trash2, ShieldCheck, UserRound } from 'lucide-react';
 import { createUserSchema, type CreateUserFormValues } from '../schemas';
 import { useAdminUsers, useCreateUser, useCreateAdminUser, useDeleteUser } from '@/hooks/use-admin-users';
 import { useAuthStore } from '@/store/auth-store';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
@@ -21,10 +22,19 @@ const roleTone: Record<UserRole, 'neutral' | 'gold' | 'crimson'> = {
   [UserRole.SUPERADMIN]: 'crimson',
 };
 
+// Matches the backend's delete rule: superadmins can delete anyone; admins
+// can delete regular users and themselves. Nobody else reaches this table —
+// RequireAdmin already gates the route to admin/superadmin.
+function canDelete(currentRole: UserRole | undefined, currentUserId: string | null, target: User): boolean {
+  if (currentRole === UserRole.SUPERADMIN) return true;
+  if (currentRole === UserRole.ADMIN) return target.role === UserRole.USER || target.id === currentUserId;
+  return false;
+}
+
 export function AdminUsersPage() {
   const currentUserId = useAuthStore((s) => s.userId);
-  const currentRole = useAuthStore((s) => s.role);
-  const isSuperAdmin = currentRole === UserRole.SUPERADMIN;
+  const { data: me } = useCurrentUser();
+  const isSuperAdmin = me?.role === UserRole.SUPERADMIN;
 
   const { data: users, isLoading, isError, refetch } = useAdminUsers();
   const createUser = useCreateUser();
@@ -116,7 +126,7 @@ export function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-paper-500">{formatDate(user.created_at)}</td>
                   <td className="px-4 py-3 text-right">
-                    {isSuperAdmin && user.id !== currentUserId && (
+                    {canDelete(me?.role, currentUserId, user) && (
                       <button
                         onClick={() => setToDelete(user)}
                         className="rounded-md p-1.5 text-paper-500 hover:bg-ink-700 hover:text-crimson-400"
@@ -135,7 +145,8 @@ export function AdminUsersPage() {
 
       {!isSuperAdmin && (
         <p className="mt-4 text-xs text-paper-500">
-          Only superadmins can delete users or create new admin accounts.
+          As an admin, you can delete regular users and your own account. Only superadmins can
+          delete other admins or grant admin access.
         </p>
       )}
 
@@ -172,5 +183,3 @@ export function AdminUsersPage() {
     </div>
   );
 }
-
-

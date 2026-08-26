@@ -1,21 +1,27 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Lock } from 'lucide-react';
+import { Lock, AlertTriangle } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { useUpdateAccount, useUpdateProfile } from '@/hooks/use-account';
+import { useUpdateAccount, useUpdateProfile, useDeleteMyAccount } from '@/hooks/use-account';
 import { accountSchema, profileSchema, type AccountFormValues, type ProfileFormValues } from './schemas';
 import { AvatarPicker } from '@/components/ui/AvatarPicker';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Spinner, ErrorState } from '@/components/ui/Feedback';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { MySubscriptions } from '@/components/user/MySubscriptions';
 import { Country } from '@/api/types';
 
 export function AccountPage() {
+  const navigate = useNavigate();
   const { data: me, isLoading, isError, refetch } = useCurrentUser();
   const updateAccount = useUpdateAccount();
   const updateProfile = useUpdateProfile();
+  const deleteAccount = useDeleteMyAccount();
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const accountForm = useForm<AccountFormValues>({
     resolver: zodResolver(accountSchema),
@@ -52,6 +58,15 @@ export function AccountPage() {
 
   function handleProfileSubmit(values: ProfileFormValues) {
     updateProfile.mutate(values);
+  }
+
+  function handleDeleteAccount() {
+    deleteAccount.mutate(undefined, {
+      onSuccess: () => {
+        setConfirmingDelete(false);
+        navigate('/', { replace: true });
+      },
+    });
   }
 
   return (
@@ -124,8 +139,32 @@ export function AccountPage() {
           <MySubscriptions />
         </div>
       </section>
+
+      <section className="mt-10 rounded-card border border-crimson-500/30 bg-crimson-500/5 p-5">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-crimson-400" aria-hidden />
+          <div>
+            <h2 className="font-display text-xl tracking-wide text-paper-100">Danger zone</h2>
+            <p className="mt-1 text-sm text-paper-500">
+              Permanently delete your account and everything tied to it — favourites, reviews, and
+              subscription history. This can't be undone.
+            </p>
+            <Button variant="danger" size="sm" className="mt-4" onClick={() => setConfirmingDelete(true)}>
+              Delete my account
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete your account"
+        description="This permanently deletes your account and everything tied to it. This can't be undone."
+        confirmLabel="Delete my account"
+        isLoading={deleteAccount.isPending}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }
-
-

@@ -34,15 +34,12 @@ export interface ResetPasswordPayload {
 
 export const authApi = {
   register: (payload: RegisterPayload) => api.post('/auth/register', payload),
-
   confirmOtp: (payload: ConfirmOtpPayload) => api.post('/auth/confirm-otp', payload),
-
   login: (payload: LoginPayload) =>
     api.post<ApiEnvelope<LoginResponseData>>('/auth/login', payload),
-
   forgotPassword: (payload: ForgotPasswordPayload) => api.post('/auth/forgot-password', payload),
-
   resetPassword: (payload: ResetPasswordPayload) => api.post('/auth/reset-password', payload),
+  refresh: () => api.post<ApiEnvelope<{ authToken: string }>>('/auth/refresh'),
 };
 
 

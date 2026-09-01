@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Heart, Lock, Eye, Trash2 } from 'lucide-react';
-import { useMovieDetail } from '@/hooks/use-movie-detail';
-import { useCreateReview, useDeleteReview } from '@/hooks/use-reviews';
-import { useFavourites, useToggleFavourite } from '@/hooks/use-favourites';
-import { useCurrentUser } from '@/hooks/use-current-user';
-import { Poster } from '@/components/ui/Poster';
-import { Badge } from '@/components/ui/Feedback';
-import { StarRating } from '@/components/ui/StarRating';
-import { Spinner, ErrorState } from '@/components/ui/Feedback';
-import { Button } from '@/components/ui/Button';
-import { MoviePlayer } from '@/components/movies/MoviePlayer';
-import { ReviewForm } from '@/components/movies/ReviewForm';
-import { ReviewsList } from '@/components/movies/ReviewsList';
-import { SubscriptionType, type Review } from '@/api/types';
-
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Heart, Lock, Eye, Trash2 } from "lucide-react";
+import { useMovieDetail } from "@/hooks/use-movie-detail";
+import { useCreateReview, useDeleteReview } from "@/hooks/use-reviews";
+import { useFavourites, useToggleFavourite } from "@/hooks/use-favourites";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { Poster } from "@/components/ui/Poster";
+import { Badge } from "@/components/ui/Feedback";
+import { StarRating } from "@/components/ui/StarRating";
+import { Spinner, ErrorState } from "@/components/ui/Feedback";
+import { Button } from "@/components/ui/Button";
+import { MoviePlayer } from "@/components/movies/MoviePlayer";
+import { ReviewForm } from "@/components/movies/ReviewForm";
+import { ReviewsList } from "@/components/movies/ReviewsList";
+import { SubscriptionType, type Review } from "@/api/types";
+import { CastStrip } from "@/components/movies/CastStrip";
 export function MovieDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: movie, isLoading, isError, refetch } = useMovieDetail(slug);
@@ -26,8 +26,8 @@ export function MovieDetailPage() {
   // once it does, the real list below takes over and this is never used.
   const [localMyReview, setLocalMyReview] = useState<Review | null>(null);
 
-  const createReview = useCreateReview(movie?.id ?? '', slug ?? '');
-  const deleteReview = useDeleteReview(movie?.id ?? '', slug ?? '');
+  const createReview = useCreateReview(movie?.id ?? "", slug ?? "");
+  const deleteReview = useDeleteReview(movie?.id ?? "", slug ?? "");
 
   if (isLoading) return <Spinner label="Loading movie" />;
   if (isError || !movie) {
@@ -42,10 +42,12 @@ export function MovieDetailPage() {
     );
   }
 
-  const isFavourited = favourites?.movies.some((m) => m.id === movie.id) ?? false;
+  const isFavourited =
+    favourites?.movies.some((m) => m.id === movie.id) ?? false;
   const movieFiles = Array.isArray(movie.files) ? movie.files : null;
   const reviewItems = movie.reviews.items;
-  const alreadyReviewed = reviewItems?.some((r) => r.user.id === me?.id) ?? !!localMyReview;
+  const alreadyReviewed =
+    reviewItems?.some((r) => r.user.id === me?.id) ?? !!localMyReview;
 
   function handleToggleFavourite() {
     if (isFavourited) remove.mutate(movie!.id);
@@ -69,25 +71,36 @@ export function MovieDetailPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[280px_1fr]">
-        <Poster src={movie.poster_url} alt={movie.title} className="aspect-[2/3] w-full rounded-card" />
+        <Poster
+          src={movie.poster_url}
+          alt={movie.title}
+          className="aspect-[2/3] w-full rounded-card"
+        />
 
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            {movie.subscription_type === SubscriptionType.PREMIUM && <Badge tone="gold">Premium</Badge>}
+            {movie.subscription_type === SubscriptionType.PREMIUM && (
+              <Badge tone="gold">Premium</Badge>
+            )}
             <Badge tone="neutral">
               <Eye className="mr-1 inline size-3" aria-hidden />
               {movie.view_count.toLocaleString()} views
             </Badge>
           </div>
 
-          <h1 className="font-display text-4xl tracking-wide text-paper-100 text-balance">{movie.title}</h1>
+          <h1 className="font-display text-4xl tracking-wide text-paper-100 text-balance">
+            {movie.title}
+          </h1>
 
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-paper-500">
             <span>{movie.release_year}</span>
             <span>·</span>
             <span>{movie.duration_minutes} min</span>
             <span>·</span>
-            <StarRating value={movie.reviews.average_rating} count={movie.reviews.count} />
+            <StarRating
+              value={movie.reviews.average_rating}
+              count={movie.reviews.count}
+            />
           </div>
 
           {movie.categories.length > 0 && (
@@ -100,21 +113,27 @@ export function MovieDetailPage() {
             </div>
           )}
 
-          {movie.description && <p className="mt-4 max-w-2xl text-paper-300">{movie.description}</p>}
+          {movie.description && (
+            <p className="mt-4 max-w-2xl text-paper-300">{movie.description}</p>
+          )}
 
           <div className="mt-6">
             <Button
-              variant={isFavourited ? 'secondary' : 'primary'}
+              variant={isFavourited ? "secondary" : "primary"}
               onClick={handleToggleFavourite}
               isLoading={add.isPending || remove.isPending}
             >
-              <Heart className={isFavourited ? 'fill-crimson-400 text-crimson-400' : ''} />
-              {isFavourited ? 'In My List' : 'Add to My List'}
+              <Heart
+                className={
+                  isFavourited ? "fill-crimson-400 text-crimson-400" : ""
+                }
+              />
+              {isFavourited ? "In My List" : "Add to My List"}
             </Button>
           </div>
         </div>
       </div>
-
+      {movie.actors.length > 0 && <CastStrip actors={movie.actors} />}
       <div className="mt-10">
         {!movieFiles ? (
           <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-ink-600 py-12 text-center">
@@ -129,16 +148,20 @@ export function MovieDetailPage() {
         ) : movieFiles.length > 0 ? (
           <MoviePlayer files={movieFiles} />
         ) : (
-          <p className="text-sm text-paper-500">No playable files have been uploaded for this title yet.</p>
+          <p className="text-sm text-paper-500">
+            No playable files have been uploaded for this title yet.
+          </p>
         )}
       </div>
 
       <div className="mt-12">
-        <h2 className="font-display text-2xl tracking-wide text-paper-100">Reviews</h2>
+        <h2 className="font-display text-2xl tracking-wide text-paper-100">
+          Reviews
+        </h2>
         <p className="mt-1 text-sm text-paper-500">
           {movie.reviews.count > 0
-            ? `${movie.reviews.count} review${movie.reviews.count === 1 ? '' : 's'}, averaging ${movie.reviews.average_rating.toFixed(1)} stars.`
-            : 'No reviews yet — be the first.'}
+            ? `${movie.reviews.count} review${movie.reviews.count === 1 ? "" : "s"}, averaging ${movie.reviews.average_rating.toFixed(1)} stars.`
+            : "No reviews yet — be the first."}
         </p>
 
         <div className="mt-4 max-w-xl">
@@ -159,9 +182,13 @@ export function MovieDetailPage() {
           {!reviewItems && localMyReview && (
             <div className="mb-4 flex items-start justify-between gap-4 rounded-card border border-ink-700 bg-ink-800 p-4">
               <div>
-                <p className="text-sm font-medium text-paper-100">{localMyReview.user.username} (you)</p>
+                <p className="text-sm font-medium text-paper-100">
+                  {localMyReview.user.username} (you)
+                </p>
                 <StarRating value={localMyReview.rating} />
-                <p className="mt-2 text-sm text-paper-300">{localMyReview.comment}</p>
+                <p className="mt-2 text-sm text-paper-300">
+                  {localMyReview.comment}
+                </p>
               </div>
               <button
                 onClick={() => handleDeleteReview(localMyReview.id)}
@@ -175,13 +202,19 @@ export function MovieDetailPage() {
 
           {!me ? (
             <p className="text-sm text-paper-500">
-              <Link to="/login" className="font-medium text-gold-400 hover:text-gold-300">
+              <Link
+                to="/login"
+                className="font-medium text-gold-400 hover:text-gold-300"
+              >
                 Sign in
-              </Link>{' '}
+              </Link>{" "}
               to leave a review.
             </p>
           ) : alreadyReviewed ? null : (
-            <ReviewForm onSubmit={handlePostReview} isSubmitting={createReview.isPending} />
+            <ReviewForm
+              onSubmit={handlePostReview}
+              isSubmitting={createReview.isPending}
+            />
           )}
         </div>
       </div>

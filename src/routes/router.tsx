@@ -1,47 +1,65 @@
-import { lazy } from 'react';
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { RootLayout } from '@/components/layout/RootLayout';
-import { RequireAuth, RequireGuest, RequireAdmin } from './guards';
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { RouteErrorBoundary } from './RouteErrorBoundary';
-import { AdminSuspense } from './AdminSuspense';
+import { lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { RootLayout } from "@/components/layout/RootLayout";
+import { RequireAuth, RequireGuest, RequireAdmin } from "./guards";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import { RouteErrorBoundary } from "./RouteErrorBoundary";
+import { AdminSuspense } from "./AdminSuspense";
 
-import { BrowsePage } from '@/pages/movies/BrowsePage';
-import { MovieDetailPage } from '@/pages/movies/MovieDetailPage';
-import { PlansPage } from '@/pages/movies/PlansPage';
+import { BrowsePage } from "@/pages/movies/BrowsePage";
+import { MovieDetailPage } from "@/pages/movies/MovieDetailPage";
+import { PlansPage } from "@/pages/movies/PlansPage";
 
-import { LoginPage } from '@/pages/auth/LoginPage';
-import { RegisterPage } from '@/pages/auth/RegisterPage';
-import { ConfirmOtpPage } from '@/pages/auth/ConfirmOtpPage';
-import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
+import { LoginPage } from "@/pages/auth/LoginPage";
+import { RegisterPage } from "@/pages/auth/RegisterPage";
+import { ConfirmOtpPage } from "@/pages/auth/ConfirmOtpPage";
+import { ForgotPasswordPage } from "@/pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/pages/auth/ResetPasswordPage";
 
-import { FavouritesPage } from '@/pages/user/FavouritesPage';
-import { AccountPage } from '@/pages/user/AccountPage';
+import { FavouritesPage } from "@/pages/user/FavouritesPage";
+import { AccountPage } from "@/pages/user/AccountPage";
+
+import { ActorDetailPage } from "@/pages/movies/ActorDetailPage";
 
 // The admin dashboard is a meaningful chunk of code that only admins/superadmins
 // ever load — code-split it so regular visitors' initial bundle stays lean.
-const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
+const AdminLayout = lazy(() =>
+  import("@/pages/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })),
+);
 const AdminMoviesPage = lazy(() =>
-  import('@/pages/admin/movies/AdminMoviesPage').then((m) => ({ default: m.AdminMoviesPage })),
+  import("@/pages/admin/movies/AdminMoviesPage").then((m) => ({
+    default: m.AdminMoviesPage,
+  })),
 );
 const AdminMovieFormPage = lazy(() =>
-  import('@/pages/admin/movies/AdminMovieFormPage').then((m) => ({ default: m.AdminMovieFormPage })),
+  import("@/pages/admin/movies/AdminMovieFormPage").then((m) => ({
+    default: m.AdminMovieFormPage,
+  })),
 );
 const AdminCategoriesPage = lazy(() =>
-  import('@/pages/admin/categories/AdminCategoriesPage').then((m) => ({ default: m.AdminCategoriesPage })),
+  import("@/pages/admin/categories/AdminCategoriesPage").then((m) => ({
+    default: m.AdminCategoriesPage,
+  })),
 );
 const AdminUsersPage = lazy(() =>
-  import('@/pages/admin/users/AdminUsersPage').then((m) => ({ default: m.AdminUsersPage })),
+  import("@/pages/admin/users/AdminUsersPage").then((m) => ({
+    default: m.AdminUsersPage,
+  })),
 );
 const AdminPlansPage = lazy(() =>
-  import('@/pages/admin/plans/AdminPlansPage').then((m) => ({ default: m.AdminPlansPage })),
+  import("@/pages/admin/plans/AdminPlansPage").then((m) => ({
+    default: m.AdminPlansPage,
+  })),
 );
 const AdminSubscriptionsPage = lazy(() =>
-  import('@/pages/admin/subscriptions/AdminSubscriptionsPage').then((m) => ({ default: m.AdminSubscriptionsPage })),
+  import("@/pages/admin/subscriptions/AdminSubscriptionsPage").then((m) => ({
+    default: m.AdminSubscriptionsPage,
+  })),
 );
 const AdminPaymentsPage = lazy(() =>
-  import('@/pages/admin/payments/AdminPaymentsPage').then((m) => ({ default: m.AdminPaymentsPage })),
+  import("@/pages/admin/payments/AdminPaymentsPage").then((m) => ({
+    default: m.AdminPaymentsPage,
+  })),
 );
 
 export const router = createBrowserRouter([
@@ -49,26 +67,27 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: '/', element: <BrowsePage /> },
-      { path: '/plans', element: <PlansPage /> },
+      { path: "/", element: <BrowsePage /> },
+      { path: "/plans", element: <PlansPage /> },
 
       {
         element: <RequireGuest />,
         children: [
-          { path: '/login', element: <LoginPage /> },
-          { path: '/register', element: <RegisterPage /> },
-          { path: '/confirm-otp', element: <ConfirmOtpPage /> },
-          { path: '/forgot-password', element: <ForgotPasswordPage /> },
-          { path: '/reset-password', element: <ResetPasswordPage /> },
+          { path: "/login", element: <LoginPage /> },
+          { path: "/register", element: <RegisterPage /> },
+          { path: "/confirm-otp", element: <ConfirmOtpPage /> },
+          { path: "/forgot-password", element: <ForgotPasswordPage /> },
+          { path: "/reset-password", element: <ResetPasswordPage /> },
         ],
       },
 
       {
         element: <RequireAuth />,
         children: [
-          { path: '/movies/:slug', element: <MovieDetailPage /> },
-          { path: '/favourites', element: <FavouritesPage /> },
-          { path: '/account', element: <AccountPage /> },
+          { path: "/movies/:slug", element: <MovieDetailPage /> },
+          { path: "/actors/:id", element: <ActorDetailPage /> },
+          { path: "/favourites", element: <FavouritesPage /> },
+          { path: "/account", element: <AccountPage /> },
         ],
       },
 
@@ -76,7 +95,7 @@ export const router = createBrowserRouter([
         element: <RequireAdmin />,
         children: [
           {
-            path: '/admin',
+            path: "/admin",
             element: (
               <AdminSuspense>
                 <AdminLayout />
@@ -85,7 +104,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="movies" replace /> },
               {
-                path: 'movies',
+                path: "movies",
                 element: (
                   <AdminSuspense>
                     <AdminMoviesPage />
@@ -93,7 +112,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'movies/new',
+                path: "movies/new",
                 element: (
                   <AdminSuspense>
                     <AdminMovieFormPage />
@@ -101,7 +120,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'movies/:id/edit',
+                path: "movies/:id/edit",
                 element: (
                   <AdminSuspense>
                     <AdminMovieFormPage />
@@ -109,7 +128,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'categories',
+                path: "categories",
                 element: (
                   <AdminSuspense>
                     <AdminCategoriesPage />
@@ -117,7 +136,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'users',
+                path: "users",
                 element: (
                   <AdminSuspense>
                     <AdminUsersPage />
@@ -125,7 +144,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'plans',
+                path: "plans",
                 element: (
                   <AdminSuspense>
                     <AdminPlansPage />
@@ -133,7 +152,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'subscriptions',
+                path: "subscriptions",
                 element: (
                   <AdminSuspense>
                     <AdminSubscriptionsPage />
@@ -141,7 +160,7 @@ export const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'payments',
+                path: "payments",
                 element: (
                   <AdminSuspense>
                     <AdminPaymentsPage />
@@ -153,9 +172,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      { path: '*', element: <NotFoundPage /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);
-
-

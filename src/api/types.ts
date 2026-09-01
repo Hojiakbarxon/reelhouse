@@ -277,6 +277,27 @@ export interface MovieFile {
   quality: VideoQuality;
   language: string;
 }
+export interface MovieCastMember {
+  characterName: string;
+  castOrder: number;
+  actor: {
+    id?: string;
+    tmdbId?: number;
+    name: string;
+    profilePath: string | null;
+  };
+}
+
+export interface ActorDetail {
+  name: string;
+  birthday: string | null;
+  deathday: string | null;
+  biography: string | null;
+  placeOfBirth: string | null;
+  profilePath: string | null;
+  gender: number | null;
+  adult: boolean;
+}
 
 export interface MovieListItem {
   id: string;
@@ -305,9 +326,11 @@ export interface MovieDetail {
   rating: number | string;
   subscription_type: SubscriptionType;
   view_count: number;
+  tmdbId : number;
   categories: string[];
   // Locked when the movie is premium and the viewer has no active plan.
   files: MovieFile[] | { message: string };
+  actors : MovieCastMember[];
   reviews: {
     average_rating: number;
     count: number;

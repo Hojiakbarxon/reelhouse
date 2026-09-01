@@ -28,6 +28,34 @@ export interface CreateMoviePayload {
   poster?: File;
 }
 
+export interface TmdbSearchResult {
+  id: number;
+  title: string;
+  release_date: string | null;
+  poster_path: string | null;
+}
+
+export interface TmdbCastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface AddCastMemberPayload {
+  tmdbId: number;
+  characterName: string;
+  castOrder: number;
+}
+
+export interface BulkAddResult {
+  tmdbId: number;
+  status: 'added' | 'skipped' | 'failed';
+  actorId?: string;
+  reason?: string;
+}
+
 function toMovieFormData(payload: CreateMoviePayload | Partial<CreateMoviePayload>) {
   const form = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
@@ -84,6 +112,20 @@ export const moviesApi = {
     api.patch(`/admin/movies/files/${fileId}`, payload),
 
   removeFile: (fileId: string) => api.delete(`/admin/movies/files/${fileId}`),
+
+  tmdbSearch: (query: string) =>
+    api.get<{ results: TmdbSearchResult[] }>('/admin/movies/tmdb/search', { params: { query } }),
+
+  tmdbCast: (movieId: string) => api.get<TmdbCastMember[]>(`/admin/movies/${movieId}/tmdb/cast`),
+
+  connectTmdb: (movieId: string, tmdbId: number) =>
+    api.patch<ApiEnvelope<Record<string, never>>>(`/admin/movies/${movieId}/tmdb`, { tmdbId }),
+
+  addCastMember: (movieId: string, payload: AddCastMemberPayload) =>
+    api.post<ApiEnvelope<{ actorId: string }>>(`/admin/movies/${movieId}/add-actor`, payload),
+
+  addCastMembersBulk: (movieId: string, payload: AddCastMemberPayload[]) =>
+    api.post<ApiEnvelope<{ results: BulkAddResult[] }>>(`/admin/movies/${movieId}/add-actors`, { actors: payload }),
 };
 
 

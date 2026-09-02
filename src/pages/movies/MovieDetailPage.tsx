@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Heart, Lock, Eye, Trash2 } from "lucide-react";
 import { useMovieDetail } from "@/hooks/use-movie-detail";
 import { useCreateReview, useDeleteReview } from "@/hooks/use-reviews";
@@ -21,6 +21,7 @@ export function MovieDetailPage() {
   const { data: me } = useCurrentUser();
   const { data: favourites } = useFavourites();
   const { add, remove } = useToggleFavourite();
+  const navigate = useNavigate();
 
   // Fallback for before the backend embeds reviews.items on GET /movies/:slug —
   // once it does, the real list below takes over and this is never used.
@@ -50,6 +51,10 @@ export function MovieDetailPage() {
     reviewItems?.some((r) => r.user.id === me?.id) ?? !!localMyReview;
 
   function handleToggleFavourite() {
+    if (!me) {
+      navigate("/login");
+      return;
+    }
     if (isFavourited) remove.mutate(movie!.id);
     else add.mutate(movie!.id);
   }

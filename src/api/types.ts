@@ -356,7 +356,7 @@ export interface AdminMovieListItem {
 
 export interface Review {
   id: string;
-  user: { id: string; username: string };
+  user: { id: string; username: string; avatar_url : string | null };
   movie_id?: string;
   rating: number;
   comment: string;

@@ -69,6 +69,8 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <BrowsePage /> },
       { path: "/plans", element: <PlansPage /> },
+      { path: "/movies/:slug", element: <MovieDetailPage /> },
+      { path: "/actors/:id", element: <ActorDetailPage /> },
 
       {
         element: <RequireGuest />,
@@ -84,8 +86,6 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          { path: "/movies/:slug", element: <MovieDetailPage /> },
-          { path: "/actors/:id", element: <ActorDetailPage /> },
           { path: "/favourites", element: <FavouritesPage /> },
           { path: "/account", element: <AccountPage /> },
         ],

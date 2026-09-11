@@ -271,12 +271,20 @@ export interface Category {
   description: string | null;
 }
 
+export enum SourceType {
+  UPLOADED = 'UPLOADED',
+  EXTERNAL = 'EXTERNAL',
+}
+
 export interface MovieFile {
   id: string;
-  file_url: string;
+  file_url: string | null;
+  external_url: string | null;
+  source_type: SourceType;
   quality: VideoQuality;
   language: string;
 }
+
 export interface MovieCastMember {
   characterName: string;
   castOrder: number;
@@ -326,11 +334,11 @@ export interface MovieDetail {
   rating: number | string;
   subscription_type: SubscriptionType;
   view_count: number;
-  tmdbId : number;
+  tmdbId: number;
   categories: string[];
   // Locked when the movie is premium and the viewer has no active plan.
   files: MovieFile[] | { message: string };
-  actors : MovieCastMember[];
+  actors: MovieCastMember[];
   reviews: {
     average_rating: number;
     count: number;
@@ -356,7 +364,7 @@ export interface AdminMovieListItem {
 
 export interface Review {
   id: string;
-  user: { id: string; username: string; avatar_url : string | null };
+  user: { id: string; username: string; avatar_url: string | null };
   movie_id?: string;
   rating: number;
   comment: string;
@@ -413,3 +421,11 @@ export interface Paginated<T> {
 }
 
 
+export interface SuggestedMovie {
+  id: string;
+  title: string;
+  slug: string;
+  release_year: number;
+  poster_url: string | null;
+  subscription_type: SubscriptionType;
+}

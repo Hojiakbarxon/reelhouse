@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { moviesApi, type CreateMoviePayload } from '@/api/movies';
 import { extractErrorMessage } from '@/api/client';
-import type { VideoQuality } from '@/api/types';
+import type { SourceType, VideoQuality } from '@/api/types';
 
 export function useAdminMovies() {
   return useQuery({
@@ -54,8 +54,13 @@ export function useDeleteMovie() {
 export function useAddMovieFile(movieId: string, slug: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ quality, language, file }: { quality: VideoQuality; language?: string; file: File }) =>
-      moviesApi.addFile(movieId, quality, language, file),
+    mutationFn: (payload: {
+      quality: VideoQuality;
+      language?: string;
+      sourceType: SourceType;
+      externalUrl?: string;
+      file?: File;
+    }) => moviesApi.addFile(movieId, payload),
     onSuccess: () => {
       toast.success('File added');
       queryClient.invalidateQueries({ queryKey: ['movies', 'detail', slug] });

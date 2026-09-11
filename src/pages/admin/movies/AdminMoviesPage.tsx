@@ -1,18 +1,31 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { useAdminMovies, useDeleteMovie } from '@/hooks/use-admin-movies';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Feedback';
-import { Spinner, EmptyState, ErrorState } from '@/components/ui/Feedback';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { formatDate } from '@/lib/format';
-import { SubscriptionType, type AdminMovieListItem } from '@/api/types';
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useAdminMovies, useDeleteMovie } from "@/hooks/use-admin-movies";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Feedback";
+import { Spinner, EmptyState, ErrorState } from "@/components/ui/Feedback";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { formatDate } from "@/lib/format";
+import { SubscriptionType, type AdminMovieListItem } from "@/api/types";
 
 export function AdminMoviesPage() {
   const { data, isLoading, isError, refetch } = useAdminMovies();
   const deleteMovie = useDeleteMovie();
   const [toDelete, setToDelete] = useState<AdminMovieListItem | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredMovies = useMemo(() => {
+    if (!data?.movies) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return data.movies;
+    return data.movies.filter(
+      (movie) =>
+        movie.title.toLowerCase().includes(q) ||
+        String(movie.release_year).includes(q) ||
+        (movie.created_by ?? "").toLowerCase().includes(q),
+    );
+  }, [data?.movies, search]);
 
   function handleConfirmDelete() {
     if (!toDelete) return;
@@ -23,8 +36,12 @@ export function AdminMoviesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl tracking-wide text-paper-100">Movies</h2>
-          <p className="text-sm text-paper-500">{data?.total ?? 0} titles in the catalog</p>
+          <h2 className="font-display text-2xl tracking-wide text-paper-100">
+            Movies
+          </h2>
+          <p className="text-sm text-paper-500">
+            {data?.total ?? 0} titles in the catalog
+          </p>
         </div>
         <Link to="/admin/movies/new">
           <Button>
@@ -34,12 +51,36 @@ export function AdminMoviesPage() {
         </Link>
       </div>
 
+      {!isLoading && !isError && data && data.movies.length > 0 && (
+        <div className="relative mb-4 max-w-sm">
+          <label htmlFor="admin-movie-search" className="sr-only">
+            Search movies
+          </label>
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-paper-500" />
+          <input
+            id="admin-movie-search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, year, or added by…"
+            className="w-full rounded-md border border-ink-600 bg-ink-800 py-2.5 pl-9 pr-3 text-paper-100 placeholder:text-ink-400 focus:border-gold-400"
+          />
+        </div>
+      )}
+
       {isLoading ? (
         <Spinner label="Loading movies" />
       ) : isError ? (
         <ErrorState onRetry={() => refetch()} />
       ) : !data || data.movies.length === 0 ? (
-        <EmptyState title="No movies yet" description="Add your first title to the catalog." />
+        <EmptyState
+          title="No movies yet"
+          description="Add your first title to the catalog."
+        />
+      ) : filteredMovies.length === 0 ? (
+        <EmptyState
+          title="No matches"
+          description={`Nothing matches "${search}". Try a different search term.`}
+        />
       ) : (
         <div className="overflow-x-auto rounded-card border border-ink-700">
           <table className="w-full text-left text-sm">
@@ -56,19 +97,37 @@ export function AdminMoviesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-700">
-              {data.movies.map((movie) => (
+              {filteredMovies.map((movie) => (
                 <tr key={movie.id} className="hover:bg-ink-800/50">
-                  <td className="px-4 py-3 font-medium text-paper-100">{movie.title}</td>
-                  <td className="px-4 py-3 text-paper-300">{movie.release_year}</td>
+                  <td className="px-4 py-3 font-medium text-paper-100">
+                    {movie.title}
+                  </td>
+                  <td className="px-4 py-3 text-paper-300">
+                    {movie.release_year}
+                  </td>
                   <td className="px-4 py-3">
-                    <Badge tone={movie.subscription_type === SubscriptionType.PREMIUM ? 'gold' : 'neutral'}>
+                    <Badge
+                      tone={
+                        movie.subscription_type === SubscriptionType.PREMIUM
+                          ? "gold"
+                          : "neutral"
+                      }
+                    >
                       {movie.subscription_type}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 font-mono text-paper-300">{movie.view_count}</td>
-                  <td className="px-4 py-3 font-mono text-paper-300">{movie.review_count}</td>
-                  <td className="px-4 py-3 text-paper-500">{formatDate(movie.created_at)}</td>
-                  <td className="px-4 py-3 text-paper-500">{movie.created_by ?? '—'}</td>
+                  <td className="px-4 py-3 font-mono text-paper-300">
+                    {movie.view_count}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-paper-300">
+                    {movie.review_count}
+                  </td>
+                  <td className="px-4 py-3 text-paper-500">
+                    {formatDate(movie.created_at)}
+                  </td>
+                  <td className="px-4 py-3 text-paper-500">
+                    {movie.created_by ?? "—"}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
                       <Link
@@ -106,5 +165,3 @@ export function AdminMoviesPage() {
     </div>
   );
 }
-
-

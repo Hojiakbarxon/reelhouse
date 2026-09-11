@@ -5,6 +5,7 @@ import { useCategories } from '@/hooks/use-categories';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useAuthStore } from '@/store/auth-store';
 import { MovieCard } from '@/components/movies/MovieCard';
+import { SuggestionStrip } from '@/components/movies/SuggestionStrip';
 import { Pagination } from '@/components/ui/Pagination';
 import { Select } from '@/components/ui/Select';
 import { Spinner, EmptyState, ErrorState } from '@/components/ui/Feedback';
@@ -41,6 +42,8 @@ export function BrowsePage() {
         <h1 className="font-display text-4xl tracking-wide text-paper-100">Browse the catalog</h1>
         <p className="mt-2 text-paper-500">Find your next watch.</p>
       </div>
+
+      <SuggestionStrip />
 
       <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto]">
         <div className="relative">
@@ -110,5 +113,3 @@ export function BrowsePage() {
     </div>
   );
 }
-
-

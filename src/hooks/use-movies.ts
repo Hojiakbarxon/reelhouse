@@ -9,4 +9,10 @@ export function useMovies(query: MoviesQuery) {
   });
 }
 
-
+export function useSuggestedMovies(movieIds: string[]) {
+  return useQuery({
+    queryKey: ['movies', 'suggestions', movieIds],
+    queryFn: async () => (await moviesApi.getSuggestions(movieIds)).data.data,
+    enabled: movieIds.length > 0,
+  });
+}

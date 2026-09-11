@@ -1,12 +1,14 @@
 import { api, type ApiEnvelope } from './client';
-import type {
-  AdminMovieListItem,
-  MovieDetail,
-  MovieListItem,
-  Paginated,
-  Review,
-  SubscriptionType,
-  VideoQuality,
+import {
+  SourceType,
+  type AdminMovieListItem,
+  type MovieDetail,
+  type MovieListItem,
+  type Paginated,
+  type Review,
+  type SubscriptionType,
+  type SuggestedMovie,
+  type VideoQuality,
 } from './types';
 
 export interface MoviesQuery {
@@ -98,15 +100,36 @@ export const moviesApi = {
 
   adminDelete: (id: string) => api.delete(`/admin/movies/${id}`),
 
-  addFile: (movieId: string, quality: VideoQuality, language: string | undefined, file: File) => {
+  addFile: (
+    movieId: string,
+    payload: {
+      quality: VideoQuality;
+      language?: string;
+      sourceType: SourceType;
+      externalUrl?: string;
+      file?: File;
+    },
+  ) => {
     const form = new FormData();
-    form.append('quality', quality);
-    if (language) form.append('language', language);
-    form.append('file', file);
+    form.append('quality', payload.quality);
+    if (payload.language) form.append('language', payload.language);
+    form.append('source_type', payload.sourceType);
+
+    if (payload.sourceType === SourceType.EXTERNAL) {
+      form.append('external_url', payload.externalUrl ?? '');
+    } else if (payload.file) {
+      form.append('file', payload.file);
+    }
+
     return api.post(`/admin/movies/${movieId}/files`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+
+  getSuggestions: (movieIds: string[]) =>
+    api.get<ApiEnvelope<SuggestedMovie[]>>('/movies/suggestions/list', {
+      params: { ids: movieIds.join(',') },
+    }),
 
   updateFile: (fileId: string, payload: { quality?: VideoQuality; language?: string }) =>
     api.patch(`/admin/movies/files/${fileId}`, payload),

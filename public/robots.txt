@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /favourites
+Disallow: /login
+Disallow: /register
+Disallow: /confirm-otp
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Replace with your real deployed domain:
+Sitemap: https://YOUR-DOMAIN.example/sitemap.xml
